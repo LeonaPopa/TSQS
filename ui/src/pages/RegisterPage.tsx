@@ -5,7 +5,6 @@ import {
   TextField,
   Button,
   Typography,
-  Link,
   FormControlLabel,
   Checkbox,
   InputAdornment,
@@ -14,6 +13,7 @@ import {
 } from "@mui/material";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
+import { NavLink } from "react-router-dom";
 
 const RegisterPage = () => {
   const [showPassword, setShowPassword] = React.useState(false);
@@ -170,9 +170,9 @@ const RegisterPage = () => {
           {/* Already have an account */}
           <Typography variant="body2" sx={{ textAlign: "center" }}>
             Already have an account?{" "}
-            <Link href="/login" underline="hover" color="primary">
+            <NavLink to="/login" color="primary">
               Login
-            </Link>
+            </NavLink>
           </Typography>
         </Card>
       </Grid>
@@ -189,10 +189,9 @@ const RegisterPage = () => {
           backgroundColor: "#fff", // Right section background
         }}
       >
-        {/* You can replace this Box with an Image component */}
         <Box
           component="img"
-          src="/path-to-your-illustration.png" // Replace with your image path
+          src="https://media.istockphoto.com/id/1330902575/vector/back-to-school-concept.jpg?s=612x612&w=0&k=20&c=xrrrBt0WhLG1BRjCoUurBncbDmM-vnokQ83sPgVcX5Y="
           alt="Illustration"
           sx={{
             maxWidth: "80%",

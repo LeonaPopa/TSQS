@@ -14,6 +14,7 @@ import {
 } from "@mui/material";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
+import { NavLink } from "react-router-dom";
 
 const LoginPage = () => {
   const [showPassword, setShowPassword] = React.useState(false);
@@ -137,9 +138,9 @@ const LoginPage = () => {
           {/* Register Link */}
           <Typography variant="body2" sx={{ textAlign: "center" }}>
             Don’t have an Account?{" "}
-            <Link href="/register" underline="hover" color="primary">
+            <NavLink to="/register" color="primary">
               Register
-            </Link>
+            </NavLink>
           </Typography>
         </Card>
       </Grid>
@@ -153,13 +154,12 @@ const LoginPage = () => {
           display: "flex",
           justifyContent: "center",
           alignItems: "center",
-          backgroundColor: "#fff", // Right section background
+          backgroundColor: "#fff",
         }}
       >
-        {/* You can replace this Box with an Image component */}
         <Box
           component="img"
-          src="/path-to-your-illustration.png" // Replace with your image path
+          src="https://media.istockphoto.com/id/1330902575/vector/back-to-school-concept.jpg?s=612x612&w=0&k=20&c=xrrrBt0WhLG1BRjCoUurBncbDmM-vnokQ83sPgVcX5Y="
           alt="Illustration"
           sx={{
             maxWidth: "80%",
