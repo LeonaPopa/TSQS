@@ -1,3 +1,4 @@
+import React, { useState } from "react";
 import {
   Box,
   Typography,
@@ -7,16 +8,59 @@ import {
   AppBar,
   Toolbar,
   Avatar,
+  Paper,
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import NotificationsNoneIcon from "@mui/icons-material/NotificationsNone";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import WbSunnyIcon from "@mui/icons-material/WbSunny";
 import { useNavigate } from "react-router-dom";
-//import NightlightIcon from "@mui/icons-material/Nightlight";
+
+interface Message {
+  sender: "user" | "openai";
+  text: string;
+}
 
 const HomePage = () => {
   const navigate = useNavigate();
+
+  const [inputText, setInputText] = useState("");
+  const [messages, setMessages] = useState<Message[]>([]);
+
+  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setInputText(event.target.value);
+  };
+
+  const handleSubmit = async () => {
+    if (!inputText.trim()) {
+      alert("Please enter some text.");
+      return;
+    }
+
+    setMessages((prevMessages) => [...prevMessages, { sender: "user", text: inputText }]);
+    setInputText("");
+
+    try {
+      const response = await fetch("http://localhost:5000/api/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt: inputText }),
+      });
+
+      const data = await response.json();
+
+      setMessages((prevMessages) => [
+        ...prevMessages,
+        { sender: "openai", text: data.text || "No response received." },
+      ]);
+    } catch (error) {
+      console.error("Error calling backend API:", error);
+      setMessages((prevMessages) => [
+        ...prevMessages,
+        { sender: "openai", text: "An error occurred while generating the response." },
+      ]);
+    }
+  };
 
   return (
     <Box
@@ -80,9 +124,9 @@ const HomePage = () => {
       <Box
         sx={{
           flexGrow: 1,
-          position: "relative",
           display: "flex",
           flexDirection: "column",
+          padding: "20px",
         }}
       >
         {/* Top Navigation */}
@@ -106,7 +150,6 @@ const HomePage = () => {
             </IconButton>
             <IconButton>
               <WbSunnyIcon />
-              {/* You can toggle to <NightlightIcon /> for dark mode */}
             </IconButton>
             <IconButton onClick={() => navigate("/login")}>
               <AccountCircleIcon />
@@ -114,55 +157,68 @@ const HomePage = () => {
           </Toolbar>
         </AppBar>
 
-        {/* Background Icon */}
+        {/* Chat Messages */}
         <Box
           sx={{
-            position: "absolute",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            zIndex: 1,
-            opacity: 0.1,
-            fontSize: "300px",
+            flexGrow: 1,
+            overflowY: "auto",
+            marginBottom: "10px",
+            display: "flex",
+            flexDirection: "column",
+            gap: "10px",
           }}
         >
-          🎓
+          {messages.map((message, index) => (
+            <Box
+              key={index}
+              sx={{
+                display: "flex",
+                justifyContent: message.sender === "user" ? "flex-end" : "flex-start",
+              }}
+            >
+              <Paper
+                sx={{
+                  padding: "10px 15px",
+                  maxWidth: "60%",
+                  backgroundColor: message.sender === "user" ? "#3f51b5" : "#e0e0e0",
+                  color: message.sender === "user" ? "#fff" : "#000",
+                  borderRadius: "10px",
+                }}
+              >
+                {message.text}
+              </Paper>
+            </Box>
+          ))}
         </Box>
 
-        {/* Main Input */}
+        {/* Input Field */}
         <Box
           sx={{
             display: "flex",
-            justifyContent: "center",
-            alignItems: "flex-end",
-            flexGrow: 1,
-            position: "relative",
+            alignItems: "center",
+            gap: "10px",
+            borderTop: "1px solid #ddd",
+            paddingTop: "10px",
           }}
         >
-          <Box sx={{ position: "relative", zIndex: 2, width: "400px" }}>
-            <TextField
-              fullWidth
-              placeholder="What’s on your mind?"
-              variant="outlined"
-              sx={{
-                backgroundColor: "#fff",
-                borderRadius: "20px",
-              }}
-            />
-            <Button
-              variant="contained"
-              sx={{
-                marginTop: "10px",
-                width: "100%",
-                backgroundColor: "#3f51b5",
-                color: "#fff",
-                borderRadius: "20px",
-                textTransform: "none",
-              }}
-            >
-              Submit
-            </Button>
-          </Box>
+          <TextField
+            fullWidth
+            placeholder="Type your message..."
+            variant="outlined"
+            value={inputText}
+            onChange={handleInputChange}
+          />
+          <Button
+            variant="contained"
+            onClick={handleSubmit}
+            sx={{
+              backgroundColor: "#3f51b5",
+              color: "#fff",
+              textTransform: "none",
+            }}
+          >
+            Send
+          </Button>
         </Box>
       </Box>
     </Box>
