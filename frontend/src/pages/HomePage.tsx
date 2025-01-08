@@ -33,7 +33,7 @@ const HomePage = () => {
 
   const handleSubmit = async () => {
     if (!inputText.trim()) {
-      alert("Please enter some text.");
+      alert("Please write something.");
       return;
     }
 
@@ -151,7 +151,7 @@ const HomePage = () => {
             <IconButton>
               <WbSunnyIcon />
             </IconButton>
-            <IconButton onClick={() => navigate("/login")}>
+            <IconButton onClick={() => navigate("/profile")}>
               <AccountCircleIcon />
             </IconButton>
           </Toolbar>
