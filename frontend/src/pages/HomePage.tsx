@@ -14,7 +14,7 @@ import SearchIcon from "@mui/icons-material/Search";
 import NotificationsNoneIcon from "@mui/icons-material/NotificationsNone";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import WbSunnyIcon from "@mui/icons-material/WbSunny";
-import { useNavigate } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 
 interface Message {
   sender: "user" | "openai";
@@ -27,6 +27,10 @@ const HomePage = () => {
   const [inputText, setInputText] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
 
+  function refreshPage() {
+    window.location.reload();
+  }
+
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setInputText(event.target.value);
   };
@@ -37,7 +41,10 @@ const HomePage = () => {
       return;
     }
 
-    setMessages((prevMessages) => [...prevMessages, { sender: "user", text: inputText }]);
+    setMessages((prevMessages) => [
+      ...prevMessages,
+      { sender: "user", text: inputText },
+    ]);
     setInputText("");
 
     try {
@@ -57,7 +64,10 @@ const HomePage = () => {
       console.error("Error calling backend API:", error);
       setMessages((prevMessages) => [
         ...prevMessages,
-        { sender: "openai", text: "An error occurred while generating the response." },
+        {
+          sender: "openai",
+          text: "An error occurred while generating the response.",
+        },
       ]);
     }
   };
@@ -91,15 +101,29 @@ const HomePage = () => {
           >
             StylifyAI
           </Typography>
-          <Typography
-            variant="body1"
-            sx={{ color: "#555", cursor: "pointer", marginBottom: "10px" }}
+          <Button
+            onClick={refreshPage}
+            sx={{
+              background: "none",
+              padding: "0",
+              textTransform: "none",
+            }}
           >
-            ✨ New Chat
-          </Typography>
-          <Typography variant="body1" sx={{ color: "#555", cursor: "pointer" }}>
-            🗂️ Learning paths
-          </Typography>
+            <Typography
+              variant="body1"
+              sx={{ color: "#555", cursor: "pointer", marginBottom: "10px" }}
+            >
+              ✨ New Chat
+            </Typography>
+          </Button>
+          <NavLink to={"/learning-paths"} style={{ textDecoration: "none" }}>
+            <Typography
+              variant="body1"
+              sx={{ color: "#555", cursor: "pointer" }}
+            >
+              🗂️ Learning paths
+            </Typography>
+          </NavLink>
         </Box>
         <Box
           sx={{
@@ -173,14 +197,16 @@ const HomePage = () => {
               key={index}
               sx={{
                 display: "flex",
-                justifyContent: message.sender === "user" ? "flex-end" : "flex-start",
+                justifyContent:
+                  message.sender === "user" ? "flex-end" : "flex-start",
               }}
             >
               <Paper
                 sx={{
                   padding: "10px 15px",
                   maxWidth: "60%",
-                  backgroundColor: message.sender === "user" ? "#3f51b5" : "#e0e0e0",
+                  backgroundColor:
+                    message.sender === "user" ? "#3f51b5" : "#e0e0e0",
                   color: message.sender === "user" ? "#fff" : "#000",
                   borderRadius: "10px",
                 }}

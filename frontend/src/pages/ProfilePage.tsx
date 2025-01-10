@@ -45,6 +45,7 @@ const WritingStyleProfile = () => {
         flexDirection: "column",
         alignItems: "center",
         backgroundColor: "#f9f9f9",
+        minHeight: "100vh",
         padding: "40px",
       }}
     >
