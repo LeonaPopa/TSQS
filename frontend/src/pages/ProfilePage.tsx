@@ -1,5 +1,13 @@
 import { useEffect, useState } from "react";
-import { Box, Typography, CircularProgress } from "@mui/material";
+import {
+  Box,
+  Typography,
+  CircularProgress,
+  Button,
+  Avatar,
+  TextField,
+} from "@mui/material";
+import EditIcon from "@mui/icons-material/Edit";
 
 const WritingStyleProfile = () => {
   const [profile, setProfile] = useState("");
@@ -10,10 +18,13 @@ const WritingStyleProfile = () => {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-          const response = await fetch(`http://localhost:5000/api/profile/${userId}`, {
+        const response = await fetch(
+          `http://localhost:5000/api/profile/${userId}`,
+          {
             method: "GET",
             headers: { "Content-Type": "application/json" },
-        });
+          },
+        );
         const data = await response.json();
         setProfile(data.profile);
       } catch (error) {
@@ -34,27 +45,154 @@ const WritingStyleProfile = () => {
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
-        height: "100vh",
         backgroundColor: "#f9f9f9",
-        padding: "20px",
+        padding: "40px",
       }}
     >
-      {loading ? (
-        <CircularProgress />
-      ) : (
-        <Typography
-          variant="h5"
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          backgroundColor: "#fff",
+          padding: "0",
+          borderRadius: "15px",
+          boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+          maxWidth: "1000px",
+          width: "100%",
+          overflow: "hidden",
+        }}
+      >
+        <Box
           sx={{
-            textAlign: "center",
-            backgroundColor: "#fff",
-            padding: "20px",
-            borderRadius: "10px",
-            boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
+            width: "100%",
+            height: "150px",
+            background: "linear-gradient(90deg, #a18cd1 0%, #fbc2eb 100%)",
           }}
-        >
-          {profile}
-        </Typography>
-      )}
+        ></Box>
+        {loading ? (
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              padding: "40px",
+            }}
+          >
+            <CircularProgress />
+          </Box>
+        ) : (
+          <Box sx={{ padding: "20px 40px", width: "100%" }}>
+            <Avatar
+              sx={{
+                width: 120,
+                height: 120,
+                margin: "-60px auto 20px auto",
+                backgroundColor: "#3f51b5",
+                fontSize: "3rem",
+              }}
+            >
+              {profile ? profile.charAt(0).toUpperCase() : "P"}
+            </Avatar>
+
+            <Typography
+              variant="h5"
+              sx={{
+                fontWeight: "bold",
+                marginBottom: "10px",
+                textAlign: "center",
+                color: "#333",
+              }}
+            >
+              {profile}
+            </Typography>
+
+            <Typography
+              variant="h4"
+              sx={{
+                fontWeight: "bold",
+                marginBottom: "20px",
+                textAlign: "center",
+              }}
+            >
+              User Profile
+            </Typography>
+
+            <Box
+              sx={{
+                display: "flex",
+                flexWrap: "wrap",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "20px",
+                width: "90%",
+                margin: "50px",
+              }}
+            >
+              <TextField
+                fullWidth
+                label="Username"
+                variant="outlined"
+                value="John Doe"
+                InputProps={{ readOnly: true }}
+              />
+
+              <TextField
+                fullWidth
+                label="Email"
+                variant="outlined"
+                value="johndoe@example.com"
+                InputProps={{ readOnly: true }}
+              />
+
+              <TextField
+                fullWidth
+                label="Phone"
+                variant="outlined"
+                value="+123 456 7890"
+                InputProps={{ readOnly: true }}
+              />
+
+              <TextField
+                fullWidth
+                label="Address"
+                variant="outlined"
+                value="123 Main Street, Cityville"
+                InputProps={{ readOnly: true }}
+              />
+
+              <TextField
+                fullWidth
+                label="About"
+                multiline
+                rows={4}
+                variant="outlined"
+                value="A passionate writer with a knack for storytelling and creating engaging content."
+                InputProps={{ readOnly: true }}
+              />
+            </Box>
+
+            <Button
+              variant="contained"
+              startIcon={<EditIcon />}
+              sx={{
+                backgroundColor: "#3f51b5",
+                color: "#fff",
+                textTransform: "none",
+                padding: "10px 20px",
+                borderRadius: "8px",
+                marginTop: "20px",
+                boxShadow: "0 2px 4px rgba(0, 0, 0, 0.2)",
+                ":hover": {
+                  backgroundColor: "#303f9f",
+                },
+              }}
+            >
+              Edit Profile
+            </Button>
+          </Box>
+        )}
+      </Box>
     </Box>
   );
 };
