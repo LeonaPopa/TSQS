@@ -44,7 +44,6 @@ const WritingStyleProfile = () => {
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
-        justifyContent: "center",
         backgroundColor: "#f9f9f9",
         padding: "40px",
       }}
@@ -67,7 +66,8 @@ const WritingStyleProfile = () => {
           sx={{
             width: "100%",
             height: "150px",
-            background: "linear-gradient(90deg, #a18cd1 0%, #fbc2eb 100%)",
+            background:
+              "linear-gradient(90deg,rgb(79, 95, 202) 0%,rgb(175, 112, 243) 100%)",
           }}
         ></Box>
         {loading ? (
@@ -92,7 +92,7 @@ const WritingStyleProfile = () => {
                 fontSize: "3rem",
               }}
             >
-              {profile ? profile.charAt(0).toUpperCase() : "P"}
+              M
             </Avatar>
 
             <Typography
@@ -115,7 +115,7 @@ const WritingStyleProfile = () => {
                 textAlign: "center",
               }}
             >
-              User Profile
+              Mihnea
             </Typography>
 
             <Box
@@ -170,26 +170,25 @@ const WritingStyleProfile = () => {
                 value="A passionate writer with a knack for storytelling and creating engaging content."
                 InputProps={{ readOnly: true }}
               />
+              <Button
+                variant="contained"
+                startIcon={<EditIcon />}
+                sx={{
+                  backgroundColor: "#3f51b5",
+                  color: "#fff",
+                  textTransform: "none",
+                  padding: "10px 20px",
+                  borderRadius: "8px",
+                  marginTop: "20px",
+                  boxShadow: "0 2px 4px rgba(0, 0, 0, 0.2)",
+                  ":hover": {
+                    backgroundColor: "#303f9f",
+                  },
+                }}
+              >
+                Edit Profile
+              </Button>
             </Box>
-
-            <Button
-              variant="contained"
-              startIcon={<EditIcon />}
-              sx={{
-                backgroundColor: "#3f51b5",
-                color: "#fff",
-                textTransform: "none",
-                padding: "10px 20px",
-                borderRadius: "8px",
-                marginTop: "20px",
-                boxShadow: "0 2px 4px rgba(0, 0, 0, 0.2)",
-                ":hover": {
-                  backgroundColor: "#303f9f",
-                },
-              }}
-            >
-              Edit Profile
-            </Button>
           </Box>
         )}
       </Box>
