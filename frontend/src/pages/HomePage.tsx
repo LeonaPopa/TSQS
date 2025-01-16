@@ -64,37 +64,57 @@ const HomePage = () => {
   };
 
   const sendMessage = async () => {
-    if (!inputText.trim() || !activeChatId) return;
-
+    if (!inputText.trim()) return;
+  
+    let chatId = activeChatId;
+  
+    if (!chatId) {
+      try {
+        const response = await fetch(`http://localhost:5000/api/chats/${userId}`, {
+          method: "POST",
+        });
+        const newChat = await response.json();
+        setChats((prev) => [...prev, newChat]);
+        setActiveChatId(newChat.id);
+        chatId = newChat.id;
+      } catch (error) {
+        console.error("Error creating new chat:", error);
+        return;
+      }
+    }
+  
     const message: Message = { sender: "user", text: inputText };
-
+  
     setChats((prev) =>
       prev.map((chat) =>
-        chat.id === activeChatId
+        chat.id === chatId
           ? { ...chat, messages: [...chat.messages, message] }
-          : chat,
-      ),
+          : chat
+      )
     );
+  
     setInputText("");
-
+  
     try {
       const response = await fetch(
-        `http://localhost:5000/api/chats/${userId}/${activeChatId}`,
+        `http://localhost:5000/api/chats/${userId}/${chatId}`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ message }),
-        },
+        }
       );
-
+  
       const updatedChat = await response.json();
+  
       setChats((prev) =>
-        prev.map((chat) => (chat.id === activeChatId ? updatedChat : chat)),
+        prev.map((chat) => (chat.id === chatId ? updatedChat : chat))
       );
     } catch (error) {
       console.error("Error sending message:", error);
     }
   };
+  
 
   const activeChat = chats.find((c) => c.id === activeChatId);
 
@@ -222,7 +242,7 @@ const HomePage = () => {
                   whiteSpace: "nowrap",
                 }}
               >
-                {`Chat ${chat.id}`}
+                {`${chat.id}`}
               </Typography>
             </Button>
           ))}
