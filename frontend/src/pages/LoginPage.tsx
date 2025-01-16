@@ -14,9 +14,10 @@ import {
 } from "@mui/material";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 
 const LoginPage = () => {
+  const navigate = useNavigate();
   const [showPassword, setShowPassword] = React.useState(false);
 
   const handleTogglePassword = () => {
@@ -125,6 +126,7 @@ const LoginPage = () => {
             fullWidth
             variant="contained"
             color="primary"
+            onClick={() => navigate('/')}
             sx={{
               textTransform: "none",
               fontSize: "1rem",

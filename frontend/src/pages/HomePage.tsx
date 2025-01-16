@@ -286,9 +286,11 @@ const HomePage = () => {
               >
                 User
               </Typography>
-              <IconButton>
-                <LogoutIcon sx={{ color: "#fff" }} />
-              </IconButton>
+              <NavLink to={"/login"}>
+                <IconButton>
+                  <LogoutIcon sx={{ color: "#fff" }} />
+                </IconButton>
+              </NavLink>
             </Box>
           )}
         </Box>
