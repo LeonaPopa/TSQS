@@ -6,7 +6,7 @@ const createChat = (req, res) => {
   initializeUser(userId);
 
   const newChat = {
-    id: new Date().toISOString().replace(/[TZ]/g, ' '),
+    id: `${ Date().toLocaleString() }`,
     messages: [],
   };
 
