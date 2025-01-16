@@ -8,7 +8,7 @@ import {
   ListItemText,
 } from "@mui/material";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 
 const CoursePage = () => {
   const course = {
@@ -23,6 +23,8 @@ const CoursePage = () => {
       { title: "Common Grammar Mistakes", duration: "18 min" },
     ],
   };
+
+  const navigate = useNavigate();
 
   return (
     <Box
@@ -95,7 +97,9 @@ const CoursePage = () => {
                 primaryTypographyProps={{ fontWeight: "bold" }}
               />
               <NavLink to={"/lesson"}>
-                <PlayArrowIcon sx={{ height: "30px", width: "30px" }} />
+                <PlayArrowIcon
+                  sx={{ height: "30px", width: "30px", color: "#8ecae6" }}
+                />
               </NavLink>
             </ListItem>
           ))}
@@ -104,17 +108,15 @@ const CoursePage = () => {
         <Button
           variant="contained"
           sx={{
-            backgroundColor: "#3f51b5",
+            backgroundColor: "#023047",
             color: "#fff",
             textTransform: "none",
             padding: "10px 20px",
             borderRadius: "8px",
             width: "100%",
             boxShadow: "0 2px 4px rgba(0, 0, 0, 0.2)",
-            ":hover": {
-              backgroundColor: "#303f9f",
-            },
           }}
+          onClick={() => navigate("/lesson")}
         >
           Start Course
         </Button>

@@ -68,130 +68,123 @@ const WritingStyleProfile = () => {
             width: "100%",
             height: "150px",
             background:
-              "linear-gradient(90deg,rgb(79, 95, 202) 0%,rgb(175, 112, 243) 100%)",
+              "linear-gradient(90deg,rgb(165, 173, 227) 0%,rgb(66, 42, 175) 100%)",
           }}
         ></Box>
-        {loading ? (
+        <Box sx={{ padding: "20px 40px", width: "100%" }}>
+          <Avatar
+            sx={{
+              width: 120,
+              height: 120,
+              margin: "-60px auto 20px auto",
+              backgroundColor: "#3f51b5",
+              fontSize: "3rem",
+            }}
+          >
+            M
+          </Avatar>
+
+          <Typography
+            variant="h4"
+            sx={{
+              fontWeight: "bold",
+              marginBottom: "20px",
+              textAlign: "center",
+            }}
+          >
+            Mihnea
+          </Typography>
+
+          <Box sx={{ display: "flex", justifyContent: "center" }}>
+            {loading ? (
+              <CircularProgress />
+            ) : (
+              <Typography
+                variant="h5"
+                sx={{
+                  fontWeight: "bold",
+                  marginBottom: "10px",
+                  textAlign: "center",
+                  color: "#333",
+                }}
+              >
+                {profile}
+              </Typography>
+            )}
+          </Box>
+
           <Box
             sx={{
               display: "flex",
+              flexWrap: "wrap",
               alignItems: "center",
               justifyContent: "center",
-              padding: "40px",
+              gap: "20px",
+              width: "90%",
+              margin: "50px",
             }}
           >
-            <CircularProgress />
-          </Box>
-        ) : (
-          <Box sx={{ padding: "20px 40px", width: "100%" }}>
-            <Avatar
+            <TextField
+              fullWidth
+              label="Username"
+              variant="outlined"
+              value="John Doe"
+              InputProps={{ readOnly: true }}
+            />
+
+            <TextField
+              fullWidth
+              label="Email"
+              variant="outlined"
+              value="johndoe@example.com"
+              InputProps={{ readOnly: true }}
+            />
+
+            <TextField
+              fullWidth
+              label="Phone"
+              variant="outlined"
+              value="+123 456 7890"
+              InputProps={{ readOnly: true }}
+            />
+
+            <TextField
+              fullWidth
+              label="Address"
+              variant="outlined"
+              value="123 Main Street, Cityville"
+              InputProps={{ readOnly: true }}
+            />
+
+            <TextField
+              fullWidth
+              label="About"
+              multiline
+              rows={4}
+              variant="outlined"
+              value="A passionate writer with a knack for storytelling and creating engaging content."
+              InputProps={{ readOnly: true }}
+            />
+            <Button
+              variant="contained"
+              startIcon={<EditIcon />}
               sx={{
-                width: 120,
-                height: 120,
-                margin: "-60px auto 20px auto",
                 backgroundColor: "#3f51b5",
-                fontSize: "3rem",
+                color: "#fff",
+                textTransform: "none",
+                padding: "10px 20px",
+                borderRadius: "8px",
+                marginTop: "20px",
+                boxShadow: "0 2px 4px rgba(0, 0, 0, 0.2)",
+                ":hover": {
+                  backgroundColor: "#303f9f",
+                },
               }}
             >
-              M
-            </Avatar>
-
-            <Typography
-              variant="h5"
-              sx={{
-                fontWeight: "bold",
-                marginBottom: "10px",
-                textAlign: "center",
-                color: "#333",
-              }}
-            >
-              {profile}
-            </Typography>
-
-            <Typography
-              variant="h4"
-              sx={{
-                fontWeight: "bold",
-                marginBottom: "20px",
-                textAlign: "center",
-              }}
-            >
-              Mihnea
-            </Typography>
-
-            <Box
-              sx={{
-                display: "flex",
-                flexWrap: "wrap",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: "20px",
-                width: "90%",
-                margin: "50px",
-              }}
-            >
-              <TextField
-                fullWidth
-                label="Username"
-                variant="outlined"
-                value="John Doe"
-                InputProps={{ readOnly: true }}
-              />
-
-              <TextField
-                fullWidth
-                label="Email"
-                variant="outlined"
-                value="johndoe@example.com"
-                InputProps={{ readOnly: true }}
-              />
-
-              <TextField
-                fullWidth
-                label="Phone"
-                variant="outlined"
-                value="+123 456 7890"
-                InputProps={{ readOnly: true }}
-              />
-
-              <TextField
-                fullWidth
-                label="Address"
-                variant="outlined"
-                value="123 Main Street, Cityville"
-                InputProps={{ readOnly: true }}
-              />
-
-              <TextField
-                fullWidth
-                label="About"
-                multiline
-                rows={4}
-                variant="outlined"
-                value="A passionate writer with a knack for storytelling and creating engaging content."
-                InputProps={{ readOnly: true }}
-              />
-              <Button
-                variant="contained"
-                startIcon={<EditIcon />}
-                sx={{
-                  backgroundColor: "#3f51b5",
-                  color: "#fff",
-                  textTransform: "none",
-                  padding: "10px 20px",
-                  borderRadius: "8px",
-                  marginTop: "20px",
-                  boxShadow: "0 2px 4px rgba(0, 0, 0, 0.2)",
-                  ":hover": {
-                    backgroundColor: "#303f9f",
-                  },
-                }}
-              >
-                Edit Profile
-              </Button>
-            </Box>
+              Edit Profile
+            </Button>
           </Box>
-        )}
+        </Box>
       </Box>
     </Box>
   );

@@ -1,4 +1,5 @@
 import { Box, Typography, Button, Divider } from "@mui/material";
+import { useNavigate } from "react-router-dom";
 
 const LessonPage = () => {
   const lesson = {
@@ -7,6 +8,8 @@ const LessonPage = () => {
       "In this lesson, we will cover the basics of grammar, including the definition of grammar, its importance in communication, and the fundamental elements such as parts of speech, sentence structure, and punctuation. By understanding these concepts, you will be better equipped to create clear and effective sentences.",
     videoUrl: "https://example.com/lesson-video.mp4",
   };
+
+  const navigate = useNavigate();
 
   return (
     <Box
@@ -86,6 +89,7 @@ const LessonPage = () => {
               backgroundColor: "#303f9f",
             },
           }}
+          onClick={() => navigate("/course")}
         >
           Mark as Complete
         </Button>

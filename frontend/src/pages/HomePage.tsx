@@ -11,28 +11,40 @@ import {
   Paper,
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
+import LogoutIcon from "@mui/icons-material/Logout";
 import NotificationsNoneIcon from "@mui/icons-material/NotificationsNone";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
-import WbSunnyIcon from "@mui/icons-material/WbSunny";
+import MenuIcon from "@mui/icons-material/Menu";
 import { NavLink, useNavigate } from "react-router-dom";
-
-interface Message {
-  sender: "user" | "openai";
-  text: string;
-}
+import { Conversation } from "../interfaces/conversation.interface";
 
 const HomePage = () => {
   const navigate = useNavigate();
 
   const [inputText, setInputText] = useState("");
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [isCollapsed, setIsCollapsed] = useState(true);
+  const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [selectedConversationId, setSelectedConversationId] = useState<
+    number | null
+  >(null);
 
-  function refreshPage() {
-    window.location.reload();
-  }
+  const currentConversation = conversations.find(
+    (c) => c.id === selectedConversationId,
+  );
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setInputText(event.target.value);
+  };
+
+  const handleNewChat = () => {
+    const newConversation: Conversation = {
+      id: Date.now(),
+      title: `CHAT ${conversations.length + 1}`,
+      messages: [],
+    };
+    setConversations((prev) => [...prev, newConversation]);
+    setSelectedConversationId(newConversation.id);
+    setInputText("");
   };
 
   const handleSubmit = async () => {
@@ -41,10 +53,30 @@ const HomePage = () => {
       return;
     }
 
-    setMessages((prevMessages) => [
-      ...prevMessages,
-      { sender: "user", text: inputText },
-    ]);
+    let currentId = selectedConversationId;
+    if (!currentId) {
+      const newConversation: Conversation = {
+        id: Date.now(),
+        title: `CHAT ${conversations.length + 1}`,
+        messages: [],
+      };
+      setConversations((prev) => [...prev, newConversation]);
+      setSelectedConversationId(newConversation.id);
+      currentId = newConversation.id;
+    }
+
+    setConversations((prev) =>
+      prev.map((conv) => {
+        if (conv.id === currentId) {
+          return {
+            ...conv,
+            messages: [...conv.messages, { sender: "user", text: inputText }],
+          };
+        }
+        return conv;
+      }),
+    );
+
     setInputText("");
 
     try {
@@ -55,20 +87,41 @@ const HomePage = () => {
       });
 
       const data = await response.json();
+      const openAiReply = data.text || "No response received.";
 
-      setMessages((prevMessages) => [
-        ...prevMessages,
-        { sender: "openai", text: data.text || "No response received." },
-      ]);
+      setConversations((prev) =>
+        prev.map((conv) => {
+          if (conv.id === currentId) {
+            return {
+              ...conv,
+              messages: [
+                ...conv.messages,
+                { sender: "openai", text: openAiReply },
+              ],
+            };
+          }
+          return conv;
+        }),
+      );
     } catch (error) {
       console.error("Error calling backend API:", error);
-      setMessages((prevMessages) => [
-        ...prevMessages,
-        {
-          sender: "openai",
-          text: "An error occurred while generating the response.",
-        },
-      ]);
+      setConversations((prev) =>
+        prev.map((conv) => {
+          if (conv.id === currentId) {
+            return {
+              ...conv,
+              messages: [
+                ...conv.messages,
+                {
+                  sender: "openai",
+                  text: "An error occurred while generating the response.",
+                },
+              ],
+            };
+          }
+          return conv;
+        }),
+      );
     }
   };
 
@@ -85,62 +138,166 @@ const HomePage = () => {
       {/* Sidebar */}
       <Box
         sx={{
-          width: "250px",
-          backgroundColor: "#fff",
+          width: isCollapsed ? "60px" : "250px",
+          backgroundColor: "#023047",
           boxShadow: "2px 0 5px rgba(0, 0, 0, 0.1)",
           display: "flex",
           flexDirection: "column",
           justifyContent: "space-between",
-          padding: "20px",
+          transition: "width 0.3s ease",
+          padding: isCollapsed ? "10px" : "20px",
         }}
       >
-        <Box>
+        {/* Toggle Button */}
+        <IconButton
+          onClick={() => setIsCollapsed(!isCollapsed)}
+          sx={{
+            alignSelf: isCollapsed ? "center" : "flex-end",
+          }}
+        >
+          <MenuIcon sx={{ color: "#fff" }} />
+        </IconButton>
+
+        {/* Logo / Title (hidden if collapsed) */}
+        {!isCollapsed && (
           <Typography
-            variant="h5"
-            sx={{ fontWeight: "bold", marginBottom: "20px" }}
+            variant="h4"
+            sx={{
+              fontWeight: "bold",
+              marginBottom: "20px",
+              marginTop: "10px",
+              color: "#fff",
+            }}
           >
             StylifyAI
           </Typography>
-          <Button
-            onClick={refreshPage}
+        )}
+
+        <Box
+          sx={{
+            display: isCollapsed ? "none" : "block",
+            marginBottom: "10px",
+            cursor: "pointer",
+            color: "#fff",
+          }}
+          onClick={handleNewChat}
+        >
+          <Typography
+            variant="body1"
             sx={{
-              background: "none",
-              padding: "0",
-              textTransform: "none",
+              color: "#fff",
+              cursor: "pointer",
+              display: isCollapsed ? "none" : "block",
             }}
           >
-            <Typography
-              variant="body1"
-              sx={{ color: "#555", cursor: "pointer", marginBottom: "10px" }}
-            >
-              ✨ New Chat
-            </Typography>
-          </Button>
-          <NavLink to={"/learning-paths"} style={{ textDecoration: "none" }}>
-            <Typography
-              variant="body1"
-              sx={{ color: "#555", cursor: "pointer" }}
-            >
-              🗂️ Learning paths
-            </Typography>
-          </NavLink>
+            ✨ New Chat
+          </Typography>
         </Box>
+
+        <NavLink
+          to={"/learning-paths"}
+          style={{
+            textDecoration: "none",
+            marginBottom: "10px",
+          }}
+        >
+          <Typography
+            variant="body1"
+            sx={{
+              color: "#fff",
+              cursor: "pointer",
+              display: isCollapsed ? "none" : "block",
+            }}
+          >
+            🗂️ Learning Paths
+          </Typography>
+        </NavLink>
+
+        {/* Conversation List */}
+        <Box sx={{ marginTop: "20px" }}>
+          {conversations.map((conv) => (
+            <Button
+              key={conv.id}
+              disableRipple
+              onClick={() => setSelectedConversationId(conv.id)}
+              sx={{
+                display: "block",
+                width: "100%",
+                textAlign: "left",
+                justifyContent: isCollapsed ? "center" : "flex-start",
+                color: "#fff",
+                padding: "8px 16px",
+                borderRadius: "4px",
+                transition: "all 0.3s ease",
+                ...(selectedConversationId === conv.id &&
+                  !isCollapsed && {
+                    backgroundColor: "rgba(255,255,255,0.2)",
+                    fontWeight: "bold",
+                  }),
+
+                "&:hover": {
+                  backgroundColor: "rgba(255,255,255,0.1)",
+                },
+              }}
+            >
+              <Typography
+                variant="body1"
+                sx={{
+                  display: isCollapsed ? "none" : "block",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                {conv.title}
+              </Typography>
+            </Button>
+          ))}
+        </Box>
+
+        {/* User Profile Section */}
         <Box
           sx={{
             display: "flex",
             alignItems: "center",
             padding: "10px",
-            border: "1px solid #ddd",
-            borderRadius: "10px",
             cursor: "pointer",
+            marginTop: "auto",
+            justifyContent: isCollapsed ? "center" : "flex-start",
           }}
         >
-          <Avatar sx={{ backgroundColor: "#3f51b5", marginRight: "10px" }}>
-            M
-          </Avatar>
-          <Typography variant="body2" sx={{ fontWeight: "bold" }}>
-            Mihnea Seitoaru
-          </Typography>
+          <NavLink to={"/profile"} style={{ textDecoration: "none" }}>
+            <Avatar
+              sx={{
+                backgroundColor: "#fff",
+                marginRight: isCollapsed ? 0 : "10px",
+                color: "#219ebc",
+              }}
+            >
+              U
+            </Avatar>
+          </NavLink>
+
+          {!isCollapsed && (
+            <Box
+              sx={{
+                width: "200px",
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+              }}
+            >
+              <Typography
+                variant="body1"
+                sx={{ fontWeight: "bold", color: "#fff" }}
+              >
+                User
+              </Typography>
+              <IconButton>
+                <LogoutIcon sx={{ color: "#fff" }} />
+              </IconButton>
+            </Box>
+          )}
         </Box>
       </Box>
 
@@ -165,15 +322,17 @@ const HomePage = () => {
             justifyContent: "flex-end",
           }}
         >
-          <Toolbar disableGutters sx={{ gap: 2 }}>
+          <Toolbar
+            disableGutters
+            sx={{
+              gap: 2,
+            }}
+          >
             <IconButton>
               <SearchIcon />
             </IconButton>
             <IconButton>
               <NotificationsNoneIcon />
-            </IconButton>
-            <IconButton>
-              <WbSunnyIcon />
             </IconButton>
             <IconButton onClick={() => navigate("/profile")}>
               <AccountCircleIcon />
@@ -190,31 +349,76 @@ const HomePage = () => {
             display: "flex",
             flexDirection: "column",
             gap: "10px",
+            padding: "100px",
           }}
         >
-          {messages.map((message, index) => (
-            <Box
-              key={index}
-              sx={{
-                display: "flex",
-                justifyContent:
-                  message.sender === "user" ? "flex-end" : "flex-start",
-              }}
-            >
-              <Paper
+          {currentConversation?.messages.map((message, index) =>
+            message.sender === "user" ? (
+              <Box
+                key={index}
                 sx={{
-                  padding: "10px 15px",
-                  maxWidth: "60%",
-                  backgroundColor:
-                    message.sender === "user" ? "#3f51b5" : "#e0e0e0",
-                  color: message.sender === "user" ? "#fff" : "#000",
-                  borderRadius: "10px",
+                  display: "flex",
+                  justifyContent: "flex-start",
+                  marginBottom: "10px",
                 }}
               >
-                {message.text}
-              </Paper>
-            </Box>
-          ))}
+                <Avatar
+                  sx={{
+                    backgroundColor: "#023047",
+                    marginRight: "10px",
+                    color: "#fff",
+                  }}
+                >
+                  U
+                </Avatar>
+                <Paper
+                  sx={{
+                    padding: "10px 15px",
+                    maxWidth: "60%",
+                    backgroundColor: "#219ebc",
+                    color: "#fff",
+                    borderRadius: "10px",
+                    wordWrap: "break-word",
+                    whiteSpace: "normal",
+                  }}
+                >
+                  {message.text}
+                </Paper>
+              </Box>
+            ) : (
+              <Box
+                key={index}
+                sx={{
+                  display: "flex",
+                  justifyContent: "flex-start",
+                  marginBottom: "10px",
+                }}
+              >
+                <Avatar
+                  sx={{
+                    backgroundColor: "#ffb703",
+                    marginRight: "10px",
+                    color: "#000",
+                  }}
+                >
+                  AI
+                </Avatar>
+                <Paper
+                  sx={{
+                    padding: "10px 15px",
+                    maxWidth: "60%",
+                    backgroundColor: "#e0e0e0",
+                    color: "#000",
+                    borderRadius: "10px",
+                    wordWrap: "break-word",
+                    whiteSpace: "normal",
+                  }}
+                >
+                  {message.text}
+                </Paper>
+              </Box>
+            ),
+          )}
         </Box>
 
         {/* Input Field */}
@@ -222,26 +426,39 @@ const HomePage = () => {
           sx={{
             display: "flex",
             alignItems: "center",
+            justifyContent: "center",
             gap: "10px",
-            borderTop: "1px solid #ddd",
-            paddingTop: "10px",
+            margin: "25px",
           }}
         >
           <TextField
-            fullWidth
+            sx={{
+              width: "1000px",
+            }}
+            multiline
+            maxRows={3}
             placeholder="Type your message..."
             variant="outlined"
             value={inputText}
             onChange={handleInputChange}
+            onKeyDown={(event) => {
+              if (event.key === "Enter" && !event.shiftKey) {
+                event.preventDefault();
+                handleSubmit();
+              }
+            }}
           />
           <Button
-            variant="contained"
-            onClick={handleSubmit}
             sx={{
-              backgroundColor: "#3f51b5",
+              backgroundColor: "#023047",
               color: "#fff",
               textTransform: "none",
+              width: "100px",
+              height: "50px",
+              fontSize: "17px",
             }}
+            variant="contained"
+            onClick={handleSubmit}
           >
             Send
           </Button>
