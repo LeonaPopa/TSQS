@@ -1,16 +1,20 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Typography,
-  Button,
   IconButton,
-  List,
-  ListItem,
-  ListItemText,
   TextField,
+  Button,
+  AppBar,
+  Toolbar,
+  Avatar,
   Paper,
 } from "@mui/material";
+import SearchIcon from "@mui/icons-material/Search";
+import LogoutIcon from "@mui/icons-material/Logout";
+import NotificationsNoneIcon from "@mui/icons-material/NotificationsNone";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
+import MenuIcon from "@mui/icons-material/Menu";
 import { NavLink, useNavigate } from "react-router-dom";
 
 interface Message {
@@ -30,6 +34,7 @@ const HomePage = () => {
   const [chats, setChats] = useState<Chat[]>([]);
   const [activeChatId, setActiveChatId] = useState<string | null>(null);
   const [inputText, setInputText] = useState("");
+  const [isCollapsed, setIsCollapsed] = useState(true);
 
   useEffect(() => {
     const fetchChats = async () => {
@@ -38,7 +43,7 @@ const HomePage = () => {
         const data = await response.json();
         setChats(data);
         if (data.length > 0) {
-          setActiveChatId(data[0].id); // Set the first chat as active by default
+          setActiveChatId(data[0].id);
         }
       } catch (error) {
         console.error("Error fetching chats:", error);
@@ -98,79 +103,250 @@ const HomePage = () => {
   const activeChat = chats.find((chat) => chat.id === activeChatId);
 
   return (
-    <Box display="flex" height="100vh">
-      {/* Sidebar for Chat List */}
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "row",
+        height: "100vh",
+        backgroundColor: "#f9f9f9",
+        fontFamily: "Arial, sans-serif",
+      }}
+    >
+      {/* Sidebar */}
       <Box
-        width="250px"
-        p={2}
-        bgcolor="#f4f4f4"
-        display="flex"
-        flexDirection="column"
-        borderRight="1px solid #ddd"
+        sx={{
+          width: isCollapsed ? "60px" : "250px",
+          backgroundColor: "#023047",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "space-between",
+          transition: "width 0.3s ease",
+          padding: isCollapsed ? "10px" : "20px",
+        }}
       >
-        <IconButton onClick={() => navigate("/profile")}>
-          <AccountCircleIcon />
+        <IconButton
+          onClick={() => setIsCollapsed(!isCollapsed)}
+          sx={{
+            alignSelf: isCollapsed ? "center" : "flex-end",
+          }}
+        >
+          <MenuIcon sx={{ color: "#fff" }} />
         </IconButton>
-        <NavLink to={"/learning-paths"} style={{ textDecoration: "none" }}>
-          <Typography variant="h5" mb={2}>
-            Learning paths
+
+        {!isCollapsed && (
+          <Typography
+            variant="h4"
+            sx={{
+              fontWeight: "bold",
+              marginBottom: "20px",
+              color: "#fff",
+            }}
+          >
+            StylifyAI
+          </Typography>
+        )}
+
+        <Box
+          sx={{
+            marginBottom: "10px",
+            cursor: "pointer",
+            color: "#fff",
+          }}
+          onClick={createNewChat}
+        >
+          <Typography
+            variant="body1"
+            sx={{
+              color: "#fff",
+              display: isCollapsed ? "none" : "block",
+            }}
+          >
+            ✨ New Chat
+          </Typography>
+        </Box>
+
+        <NavLink
+          to={"/learning-paths"}
+          style={{
+            textDecoration: "none",
+            marginBottom: "10px",
+          }}
+        >
+          <Typography
+            variant="body1"
+            sx={{
+              color: "#fff",
+              display: isCollapsed ? "none" : "block",
+            }}
+          >
+            🗂️ Learning Paths
           </Typography>
         </NavLink>
-        <Typography variant="h6" mb={2}>
-          Chats
-        </Typography>
-        <List>
+
+        <Box>
           {chats.map((chat) => (
-            <ListItem
-              button
+            <Button
               key={chat.id}
-              selected={chat.id === activeChatId}
+              disableRipple
               onClick={() => setActiveChatId(chat.id)}
-            >
-              <ListItemText primary={`Chat ${chat.id}`} />
-            </ListItem>
-          ))}
-        </List>
-        
-        <Button variant="contained" color="primary" onClick={createNewChat}>
-          New Chat
-        </Button>
-        
-      </Box>
-
-      {/* Main Chat Window */}
-      <Box flex="1" display="flex" flexDirection="column" p={2}>
-        <Typography variant="h5" mb={2}>
-          {activeChatId ? `Chat: ${activeChatId}` : "Select a chat to start"}
-        </Typography>
-
-        {/* Messages */}
-        <Box flex="1" overflow="auto" mb={2}>
-          {activeChat?.messages.map((message, index) => (
-            <Paper
-              key={index}
               sx={{
-                p: 1,
-                mb: 1,
-                alignSelf: message.sender === "user" ? "flex-end" : "flex-start",
-                bgcolor: message.sender === "user" ? "#3f51b5" : "#e0e0e0",
-                color: message.sender === "user" ? "#fff" : "#000",
+                textAlign: "left",
+                justifyContent: isCollapsed ? "center" : "flex-start",
+                color: "#fff",
+                padding: "8px 16px",
+                borderRadius: "4px",
+                ...(activeChatId === chat.id && {
+                  backgroundColor: "rgba(255,255,255,0.2)",
+                  fontWeight: "bold",
+                }),
+                "&:hover": {
+                  backgroundColor: "rgba(255,255,255,0.1)",
+                },
               }}
             >
-              {message.text}
-            </Paper>
+              <Typography
+                variant="body1"
+                sx={{
+                  display: isCollapsed ? "none" : "block",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                Chat {chat.id}
+              </Typography>
+            </Button>
           ))}
         </Box>
 
-        {/* Input Field */}
-        <Box display="flex" gap={1}>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            padding: "10px",
+            marginTop: "auto",
+            justifyContent: isCollapsed ? "center" : "flex-start",
+          }}
+        >
+          <NavLink to={"/profile"} style={{ textDecoration: "none" }}>
+            <Avatar
+              sx={{
+                backgroundColor: "#fff",
+                marginRight: isCollapsed ? 0 : "10px",
+                color: "#219ebc",
+              }}
+            >
+              U
+            </Avatar>
+          </NavLink>
+        </Box>
+      </Box>
+
+      {/* Main Content */}
+      <Box
+        sx={{
+          flexGrow: 1,
+          display: "flex",
+          flexDirection: "column",
+          padding: "20px",
+        }}
+      >
+        <AppBar
+          position="static"
+          sx={{
+            backgroundColor: "transparent",
+            boxShadow: "none",
+            padding: "10px 20px",
+            display: "flex",
+            flexDirection: "row",
+            justifyContent: "flex-end",
+          }}
+        >
+          <Toolbar
+            disableGutters
+            sx={{
+              gap: 2,
+            }}
+          >
+            <IconButton>
+              <SearchIcon />
+            </IconButton>
+            <IconButton>
+              <NotificationsNoneIcon />
+            </IconButton>
+            <IconButton onClick={() => navigate("/profile")}>
+              <AccountCircleIcon />
+            </IconButton>
+          </Toolbar>
+        </AppBar>
+
+        <Box
+          sx={{
+            flexGrow: 1,
+            overflowY: "auto",
+            marginBottom: "10px",
+            display: "flex",
+            flexDirection: "column",
+            gap: "10px",
+            padding: "20px",
+          }}
+        >
+          {activeChat?.messages.map((message, index) => (
+            <Box
+              key={index}
+              sx={{
+                display: "flex",
+                justifyContent: message.sender === "user" ? "flex-end" : "flex-start",
+                marginBottom: "10px",
+              }}
+            >
+              <Paper
+                sx={{
+                  padding: "10px 15px",
+                  maxWidth: "60%",
+                  backgroundColor:
+                    message.sender === "user" ? "#219ebc" : "#e0e0e0",
+                  color: message.sender === "user" ? "#fff" : "#000",
+                  borderRadius: "10px",
+                  wordWrap: "break-word",
+                }}
+              >
+                {message.text}
+              </Paper>
+            </Box>
+          ))}
+        </Box>
+
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: "10px",
+          }}
+        >
           <TextField
-            fullWidth
+            multiline
+            maxRows={3}
+            placeholder="Type your message..."
+            variant="outlined"
             value={inputText}
             onChange={(e) => setInputText(e.target.value)}
-            placeholder="Type a message..."
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+              }
+            }}
           />
-          <Button variant="contained" color="primary" onClick={sendMessage}>
+          <Button
+            sx={{
+              backgroundColor: "#023047",
+              color: "#fff",
+            }}
+            variant="contained"
+            onClick={sendMessage}
+          >
             Send
           </Button>
         </Box>
