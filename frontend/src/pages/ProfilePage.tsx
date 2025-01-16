@@ -1,16 +1,21 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Box,
   Typography,
   CircularProgress,
-  Button,
   Avatar,
-  TextField,
+  Button,
 } from "@mui/material";
-import EditIcon from "@mui/icons-material/Edit";
+import { Bar } from "react-chartjs-2";
+import { Chart as ChartJS, BarElement, CategoryScale, LinearScale, Tooltip, Legend } from "chart.js";
+import { useNavigate } from "react-router-dom";
 
-const WritingStyleProfile = () => {
-  const [profile, setProfile] = useState("");
+ChartJS.register(BarElement, CategoryScale, LinearScale, Tooltip, Legend);
+
+const ProfilePage = () => {
+  const navigate = useNavigate();
+
+  const [profileData, setProfileData] = useState<{ [key: string]: number } | null>(null);
   const [loading, setLoading] = useState(true);
 
   const userId = 123;
@@ -18,18 +23,16 @@ const WritingStyleProfile = () => {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const response = await fetch(
-          `http://localhost:5000/api/profile/${userId}`,
-          {
-            method: "GET",
-            headers: { "Content-Type": "application/json" },
-          },
-        );
+        const response = await fetch(`http://localhost:5000/api/profile/${userId}`, {
+          method: "GET",
+          headers: { "Content-Type": "application/json" },
+        });
         const data = await response.json();
-        setProfile(data.profile);
+        const profileJson = JSON.parse(data.profile); // Parse the string into JSON
+        setProfileData(profileJson);
       } catch (error) {
         console.error("Error fetching writing style profile:", error);
-        setProfile("Failed to fetch profile. Please try again.");
+        setProfileData(null);
       } finally {
         setLoading(false);
       }
@@ -37,6 +40,31 @@ const WritingStyleProfile = () => {
 
     fetchProfile();
   }, []);
+
+  const chartData = profileData
+    ? {
+        labels: Object.keys(profileData),
+        datasets: [
+          {
+            label: "Writing Style Percentages",
+            data: Object.values(profileData),
+            backgroundColor: [
+              "rgba(75, 192, 192, 0.6)",
+              "rgba(153, 102, 255, 0.6)",
+              "rgba(255, 159, 64, 0.6)",
+              "rgba(54, 162, 235, 0.6)",
+            ],
+            borderColor: [
+              "rgba(75, 192, 192, 1)",
+              "rgba(153, 102, 255, 1)",
+              "rgba(255, 159, 64, 1)",
+              "rgba(54, 162, 235, 1)",
+            ],
+            borderWidth: 1,
+          },
+        ],
+      }
+    : null;
 
   return (
     <Box
@@ -67,8 +95,7 @@ const WritingStyleProfile = () => {
           sx={{
             width: "100%",
             height: "150px",
-            background:
-              "linear-gradient(90deg,rgb(79, 95, 202) 0%,rgb(175, 112, 243) 100%)",
+            background: "linear-gradient(90deg,rgb(79, 95, 202) 0%,rgb(175, 112, 243) 100%)",
           }}
         ></Box>
         {loading ? (
@@ -105,96 +132,58 @@ const WritingStyleProfile = () => {
                 color: "#333",
               }}
             >
-              {profile}
+              Mihnea Seitoaru
             </Typography>
 
-            <Typography
-              variant="h4"
-              sx={{
-                fontWeight: "bold",
-                marginBottom: "20px",
-                textAlign: "center",
-              }}
-            >
-              Mihnea
-            </Typography>
-
-            <Box
-              sx={{
-                display: "flex",
-                flexWrap: "wrap",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: "20px",
-                width: "90%",
-                margin: "50px",
-              }}
-            >
-              <TextField
-                fullWidth
-                label="Username"
-                variant="outlined"
-                value="John Doe"
-                InputProps={{ readOnly: true }}
-              />
-
-              <TextField
-                fullWidth
-                label="Email"
-                variant="outlined"
-                value="johndoe@example.com"
-                InputProps={{ readOnly: true }}
-              />
-
-              <TextField
-                fullWidth
-                label="Phone"
-                variant="outlined"
-                value="+123 456 7890"
-                InputProps={{ readOnly: true }}
-              />
-
-              <TextField
-                fullWidth
-                label="Address"
-                variant="outlined"
-                value="123 Main Street, Cityville"
-                InputProps={{ readOnly: true }}
-              />
-
-              <TextField
-                fullWidth
-                label="About"
-                multiline
-                rows={4}
-                variant="outlined"
-                value="A passionate writer with a knack for storytelling and creating engaging content."
-                InputProps={{ readOnly: true }}
-              />
-              <Button
-                variant="contained"
-                startIcon={<EditIcon />}
+            {profileData && chartData ? (
+              <Box
                 sx={{
-                  backgroundColor: "#3f51b5",
-                  color: "#fff",
-                  textTransform: "none",
-                  padding: "10px 20px",
-                  borderRadius: "8px",
-                  marginTop: "20px",
-                  boxShadow: "0 2px 4px rgba(0, 0, 0, 0.2)",
-                  ":hover": {
-                    backgroundColor: "#303f9f",
-                  },
+                  marginTop: "30px",
+                  width: "100%",
+                  maxWidth: "600px",
+                  margin: "0 auto",
                 }}
               >
-                Edit Profile
-              </Button>
-            </Box>
+                <Bar
+                  data={chartData}
+                  options={{
+                    responsive: true,
+                    plugins: {
+                      legend: {
+                        display: true,
+                      },
+                    },
+                  }}
+                />
+              </Box>
+            ) : (
+              <Typography
+                variant="body1"
+                sx={{
+                  textAlign: "center",
+                  color: "#999",
+                }}
+              >
+                No data available.
+              </Typography>
+            )}
           </Box>
         )}
       </Box>
+      <Button
+        variant="contained"
+        sx={{
+          marginTop: "20px",
+          backgroundColor: "#3f51b5",
+          color: "#fff",
+          textTransform: "none",
+        }}
+        onClick={() => navigate("/")}
+      >
+        Back
+      </Button>
     </Box>
   );
 };
 
-export default WritingStyleProfile;
+export default ProfilePage;

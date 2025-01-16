@@ -48,13 +48,24 @@ app.get("/api/profile/:userId", async (req, res) => {
   }
 
   const text = conversations
-    .map((conv) => `${conv.input} ${conv.response}`)
+    .map((conv) => `${conv.prompt}`)
     .join("\n");
 
   try {
     const response = await openai.completions.create({
       model: "gpt-3.5-turbo-instruct",
-      prompt: `Analyze the following text and classify it as formal, informal, or other. Provide percentages for each style:\n\n${text}`,
+      prompt: `Analyze the following text and classify it into the following writing styles: 
+      - Formal
+      - Informal
+      - Narrative
+      - Persuasive
+      
+      For each style, provide a percentage in JSON format. It's not necessary for them to add up to 100. If no text is provided, return 0 for all of them.
+      
+      Example output: {"Formal": 40, "Informal": 30, "Narrative": 20, "Persuasive": 10}
+      
+      Text: 
+      ${text}`,
       max_tokens: 1000,
     });
 

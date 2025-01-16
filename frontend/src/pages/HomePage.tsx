@@ -43,7 +43,10 @@ const HomePage = () => {
 
     setMessages((prevMessages) => [
       ...prevMessages,
-      { sender: "user", text: inputText },
+      { 
+        sender: "user", 
+        text: inputText 
+      },
     ]);
     setInputText("");
 
@@ -58,7 +61,10 @@ const HomePage = () => {
 
       setMessages((prevMessages) => [
         ...prevMessages,
-        { sender: "openai", text: data.text || "No response received." },
+        { 
+          sender: "openai", 
+          text: data.text || "No response received." 
+        },
       ]);
     } catch (error) {
       console.error("Error calling backend API:", error);
