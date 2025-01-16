@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Box,
   Typography,
@@ -16,114 +16,88 @@ import NotificationsNoneIcon from "@mui/icons-material/NotificationsNone";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import MenuIcon from "@mui/icons-material/Menu";
 import { NavLink, useNavigate } from "react-router-dom";
-import { Conversation } from "../interfaces/conversation.interface";
+import { Chat } from "../interfaces/chat.interface";
+import { Message } from "../interfaces/message.interface";
 
 const HomePage = () => {
   const navigate = useNavigate();
+  const userId = "123";
 
   const [inputText, setInputText] = useState("");
   const [isCollapsed, setIsCollapsed] = useState(true);
-  const [conversations, setConversations] = useState<Conversation[]>([]);
-  const [selectedConversationId, setSelectedConversationId] = useState<
-    number | null
-  >(null);
+  const [chats, setChats] = useState<Chat[]>([]);
+  const [activeChatId, setActiveChatId] = useState<number | null>(null);
 
-  const currentConversation = conversations.find(
-    (c) => c.id === selectedConversationId,
-  );
-
-  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setInputText(event.target.value);
-  };
-
-  const handleNewChat = () => {
-    const newConversation: Conversation = {
-      id: Date.now(),
-      title: `CHAT ${conversations.length + 1}`,
-      messages: [],
-    };
-    setConversations((prev) => [...prev, newConversation]);
-    setSelectedConversationId(newConversation.id);
-    setInputText("");
-  };
-
-  const handleSubmit = async () => {
-    if (!inputText.trim()) {
-      alert("Please write something.");
-      return;
-    }
-
-    let currentId = selectedConversationId;
-    if (!currentId) {
-      const newConversation: Conversation = {
-        id: Date.now(),
-        title: `CHAT ${conversations.length + 1}`,
-        messages: [],
-      };
-      setConversations((prev) => [...prev, newConversation]);
-      setSelectedConversationId(newConversation.id);
-      currentId = newConversation.id;
-    }
-
-    setConversations((prev) =>
-      prev.map((conv) => {
-        if (conv.id === currentId) {
-          return {
-            ...conv,
-            messages: [...conv.messages, { sender: "user", text: inputText }],
-          };
+  useEffect(() => {
+    const fetchChats = async () => {
+      try {
+        const response = await fetch(
+          `http://localhost:5000/api/chats/${userId}`,
+        );
+        const data = await response.json();
+        setChats(data);
+        if (data.length > 0) {
+          setActiveChatId(data[0].id);
         }
-        return conv;
-      }),
-    );
+      } catch (error) {
+        console.error("Error fetching chats:", error);
+      }
+    };
 
+    fetchChats();
+  }, []);
+
+  const createNewChat = async () => {
+    try {
+      const response = await fetch(
+        `http://localhost:5000/api/chats/${userId}`,
+        {
+          method: "POST",
+        },
+      );
+      const newChat = await response.json();
+      setChats((prev) => [...prev, newChat]);
+      setActiveChatId(newChat.id);
+    } catch (error) {
+      console.error("Error creating new chat:", error);
+    }
+  };
+
+  const sendMessage = async () => {
+    if (!inputText.trim() || !activeChatId) return;
+
+    const message: Message = { sender: "user", text: inputText };
+
+    // Update messages locally
+    setChats((prev) =>
+      prev.map((chat) =>
+        chat.id === activeChatId
+          ? { ...chat, messages: [...chat.messages, message] }
+          : chat,
+      ),
+    );
     setInputText("");
 
     try {
-      const response = await fetch("http://localhost:5000/api/generate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt: inputText }),
-      });
+      const response = await fetch(
+        `http://localhost:5000/api/chats/${userId}/${activeChatId}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message }),
+        },
+      );
 
-      const data = await response.json();
-      const openAiReply = data.text || "No response received.";
-
-      setConversations((prev) =>
-        prev.map((conv) => {
-          if (conv.id === currentId) {
-            return {
-              ...conv,
-              messages: [
-                ...conv.messages,
-                { sender: "openai", text: openAiReply },
-              ],
-            };
-          }
-          return conv;
-        }),
+      const updatedChat = await response.json();
+      setChats((prev) =>
+        prev.map((chat) => (chat.id === activeChatId ? updatedChat : chat)),
       );
     } catch (error) {
-      console.error("Error calling backend API:", error);
-      setConversations((prev) =>
-        prev.map((conv) => {
-          if (conv.id === currentId) {
-            return {
-              ...conv,
-              messages: [
-                ...conv.messages,
-                {
-                  sender: "openai",
-                  text: "An error occurred while generating the response.",
-                },
-              ],
-            };
-          }
-          return conv;
-        }),
-      );
+      console.error("Error sending message:", error);
     }
   };
+
+  const currentChat = chats.find((c) => c.id === activeChatId);
 
   return (
     <Box
@@ -180,7 +154,7 @@ const HomePage = () => {
             cursor: "pointer",
             color: "#fff",
           }}
-          onClick={handleNewChat}
+          onClick={createNewChat}
         >
           <Typography
             variant="body1"
@@ -213,13 +187,13 @@ const HomePage = () => {
           </Typography>
         </NavLink>
 
-        {/* Conversation List */}
+        {/* Chat List */}
         <Box sx={{ marginTop: "20px" }}>
-          {conversations.map((conv) => (
+          {chats.map((chat) => (
             <Button
-              key={conv.id}
+              key={chat.id}
               disableRipple
-              onClick={() => setSelectedConversationId(conv.id)}
+              onClick={() => setActiveChatId(chat.id)}
               sx={{
                 display: "block",
                 width: "100%",
@@ -229,7 +203,7 @@ const HomePage = () => {
                 padding: "8px 16px",
                 borderRadius: "4px",
                 transition: "all 0.3s ease",
-                ...(selectedConversationId === conv.id &&
+                ...(activeChatId === chat.id &&
                   !isCollapsed && {
                     backgroundColor: "rgba(255,255,255,0.2)",
                     fontWeight: "bold",
@@ -249,7 +223,7 @@ const HomePage = () => {
                   whiteSpace: "nowrap",
                 }}
               >
-                {conv.title}
+                {`Chat ${chat.id}`}
               </Typography>
             </Button>
           ))}
@@ -352,7 +326,7 @@ const HomePage = () => {
             padding: "100px",
           }}
         >
-          {currentConversation?.messages.map((message, index) =>
+          {currentChat?.messages.map((message, index) =>
             message.sender === "user" ? (
               <Box
                 key={index}
@@ -440,11 +414,11 @@ const HomePage = () => {
             placeholder="Type your message..."
             variant="outlined"
             value={inputText}
-            onChange={handleInputChange}
+            onChange={(e) => setInputText(e.target.value)}
             onKeyDown={(event) => {
               if (event.key === "Enter" && !event.shiftKey) {
                 event.preventDefault();
-                handleSubmit();
+                sendMessage();
               }
             }}
           />
@@ -458,7 +432,7 @@ const HomePage = () => {
               fontSize: "17px",
             }}
             variant="contained"
-            onClick={handleSubmit}
+            onClick={sendMessage}
           >
             Send
           </Button>
