@@ -63,7 +63,7 @@ const CoursePage = () => {
 
       <Box
         sx={{
-          backgroundColor: "rgba(255, 255, 255, 0.95)",
+          backgroundColor: "rgba(255, 255, 255, 0.90)",
           padding: "30px",
           borderRadius: "10px",
           boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
