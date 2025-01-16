@@ -6,8 +6,10 @@ import {
   List,
   ListItem,
   ListItemText,
+  IconButton,
 } from "@mui/material";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { NavLink, useNavigate } from "react-router-dom";
 
 const CoursePage = () => {
@@ -34,13 +36,34 @@ const CoursePage = () => {
         alignItems: "center",
         justifyContent: "center",
         padding: "40px",
-        backgroundColor: "#f9f9f9",
         minHeight: "100vh",
+        backgroundImage:
+          "url('https://www.pixelstalk.net/wp-content/uploads/2016/11/Education-Images-HD.jpg')",
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
       }}
     >
+      {/* Back Button */}
+      <IconButton
+        onClick={() => navigate("/learning-paths")}
+        sx={{
+          position: "absolute",
+          top: "20px",
+          left: "20px",
+          color: "#fff",
+          backgroundColor: "rgba(0, 0, 0, 0.5)",
+          "&:hover": {
+            backgroundColor: "rgba(0, 0, 0, 0.7)",
+          },
+        }}
+      >
+        <ArrowBackIcon />
+      </IconButton>
+
       <Box
         sx={{
-          backgroundColor: "#fff",
+          backgroundColor: "rgba(255, 255, 255, 0.95)",
           padding: "30px",
           borderRadius: "10px",
           boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",

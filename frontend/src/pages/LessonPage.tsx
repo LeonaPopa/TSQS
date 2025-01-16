@@ -1,4 +1,4 @@
-import { Box, Typography, Button, Divider } from "@mui/material";
+import { Box, Typography, Button } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 
 const LessonPage = () => {
@@ -6,7 +6,12 @@ const LessonPage = () => {
     title: "Introduction to Grammar",
     content:
       "In this lesson, we will cover the basics of grammar, including the definition of grammar, its importance in communication, and the fundamental elements such as parts of speech, sentence structure, and punctuation. By understanding these concepts, you will be better equipped to create clear and effective sentences.",
-    videoUrl: "https://example.com/lesson-video.mp4",
+    additionalInfo: [
+      "Grammar is the system and structure of a language, consisting of syntax, morphology, and semantics.",
+      "Understanding parts of speech (nouns, verbs, adjectives, etc.) is crucial for constructing proper sentences.",
+      "Correct punctuation enhances clarity and ensures the intended meaning is conveyed.",
+      "Mastering grammar improves both written and spoken communication skills.",
+    ],
   };
 
   const navigate = useNavigate();
@@ -16,83 +21,139 @@ const LessonPage = () => {
       sx={{
         display: "flex",
         flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: "40px",
         backgroundColor: "#f9f9f9",
-        minHeight: "100vh",
+        height: "100vh",
+        overflow: "hidden",
       }}
     >
+      {/* Top Bar */}
       <Box
         sx={{
-          backgroundColor: "#fff",
-          padding: "30px",
-          borderRadius: "10px",
+          backgroundColor: "#023047",
+          color: "#fff",
+          padding: "20px",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
           boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
-          maxWidth: "800px",
-          width: "100%",
         }}
       >
-        <Typography
-          variant="h4"
+        <Typography variant="h5" sx={{ fontWeight: "bold" }}>
+          StylifyAI Lessons
+        </Typography>
+        <Button
+          variant="contained"
           sx={{
+            backgroundColor: "#219ebc",
+            textTransform: "none",
             fontWeight: "bold",
-            marginBottom: "20px",
-            textAlign: "center",
           }}
+          onClick={() => navigate("/course")}
         >
-          {lesson.title}
-        </Typography>
+          Back to Course
+        </Button>
+      </Box>
 
-        <Divider sx={{ marginBottom: "20px" }} />
-
-        <Typography
-          variant="body1"
-          sx={{
-            marginBottom: "20px",
-            color: "#555",
-            textAlign: "justify",
-          }}
-        >
-          {lesson.content}
-        </Typography>
-
+      {/* Main Content */}
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "row",
+          flexGrow: 1,
+          overflow: "hidden",
+        }}
+      >
+        {/* Video Section */}
         <Box
           sx={{
-            marginBottom: "20px",
-            width: "100%",
-            height: "300px",
+            flex: 2,
             backgroundColor: "#000",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            borderRadius: "10px",
+            borderRight: "4px solid #219ebc",
             overflow: "hidden",
           }}
         >
-          <Typography sx={{ color: "#fff", fontSize: "1.2rem" }}>
-            Video Placeholder (Video URL: {lesson.videoUrl})
-          </Typography>
+          <iframe
+            width="100%"
+            height="100%"
+            src="https://www.youtube.com/embed/O-6q-siuMik"
+            title="YouTube video player"
+            frameBorder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+          ></iframe>
         </Box>
 
-        <Button
-          variant="contained"
+        {/* Lesson Content Section */}
+        <Box
           sx={{
-            backgroundColor: "#3f51b5",
-            color: "#fff",
-            textTransform: "none",
-            padding: "10px 20px",
-            borderRadius: "8px",
-            width: "100%",
-            boxShadow: "0 2px 4px rgba(0, 0, 0, 0.2)",
-            ":hover": {
-              backgroundColor: "#303f9f",
-            },
+            flex: 3,
+            display: "flex",
+            flexDirection: "column",
+            padding: "40px",
+            overflowY: "auto",
           }}
-          onClick={() => navigate("/course")}
         >
-          Mark as Complete
-        </Button>
+          <Typography
+            variant="h4"
+            sx={{
+              fontWeight: "bold",
+              color: "#023047",
+              marginBottom: "20px",
+            }}
+          >
+            {lesson.title}
+          </Typography>
+
+          <Typography
+            variant="body1"
+            sx={{
+              color: "#555",
+              textAlign: "justify",
+              marginBottom: "30px",
+              lineHeight: "1.6",
+            }}
+          >
+            {lesson.content}
+          </Typography>
+
+          {/* Additional Text Explanations */}
+          <Box sx={{ marginBottom: "30px" }}>
+            {lesson.additionalInfo.map((info, index) => (
+              <Typography
+                key={index}
+                variant="body1"
+                sx={{
+                  color: "#555",
+                  marginBottom: "10px",
+                  lineHeight: "1.6",
+                }}
+              >
+                {`• ${info}`}
+              </Typography>
+            ))}
+          </Box>
+
+          {/* Mark as Complete Button */}
+          <Button
+            variant="contained"
+            sx={{
+              backgroundColor: "#023047",
+              color: "#fff",
+              textTransform: "none",
+              padding: "15px 30px",
+              borderRadius: "10px",
+              fontSize: "1rem",
+              alignSelf: "flex-start",
+              boxShadow: "0 2px 4px rgba(0, 0, 0, 0.2)",
+            }}
+            onClick={() => navigate("/course")}
+          >
+            Mark as Complete
+          </Button>
+        </Box>
       </Box>
     </Box>
   );
