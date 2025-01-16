@@ -26,7 +26,7 @@ const HomePage = () => {
   const [inputText, setInputText] = useState("");
   const [isCollapsed, setIsCollapsed] = useState(true);
   const [chats, setChats] = useState<Chat[]>([]);
-  const [activeChatId, setActiveChatId] = useState<number | null>(null);
+  const [activeChatId, setActiveChatId] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchChats = async () => {
@@ -68,7 +68,6 @@ const HomePage = () => {
 
     const message: Message = { sender: "user", text: inputText };
 
-    // Update messages locally
     setChats((prev) =>
       prev.map((chat) =>
         chat.id === activeChatId
@@ -97,7 +96,7 @@ const HomePage = () => {
     }
   };
 
-  const currentChat = chats.find((c) => c.id === activeChatId);
+  const activeChat = chats.find((c) => c.id === activeChatId);
 
   return (
     <Box
@@ -326,7 +325,7 @@ const HomePage = () => {
             padding: "100px",
           }}
         >
-          {currentChat?.messages.map((message, index) =>
+          {activeChat?.messages.map((message, index) =>
             message.sender === "user" ? (
               <Box
                 key={index}
