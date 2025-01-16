@@ -28,7 +28,7 @@ const ProfilePage = () => {
           headers: { "Content-Type": "application/json" },
         });
         const data = await response.json();
-        const profileJson = JSON.parse(data.profile); // Parse the string into JSON
+        const profileJson = JSON.parse(data.profile);
         setProfileData(profileJson);
       } catch (error) {
         console.error("Error fetching writing style profile:", error);

@@ -1,19 +1,16 @@
-import React, { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Box,
   Typography,
-  IconButton,
-  TextField,
   Button,
-  AppBar,
-  Toolbar,
-  Avatar,
+  IconButton,
+  List,
+  ListItem,
+  ListItemText,
+  TextField,
   Paper,
 } from "@mui/material";
-import SearchIcon from "@mui/icons-material/Search";
-import NotificationsNoneIcon from "@mui/icons-material/NotificationsNone";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
-import WbSunnyIcon from "@mui/icons-material/WbSunny";
 import { NavLink, useNavigate } from "react-router-dom";
 
 interface Message {
@@ -21,234 +18,159 @@ interface Message {
   text: string;
 }
 
+interface Chat {
+  id: string;
+  messages: Message[];
+}
+
 const HomePage = () => {
   const navigate = useNavigate();
 
+  const userId = "123"; // Static user ID for now
+  const [chats, setChats] = useState<Chat[]>([]);
+  const [activeChatId, setActiveChatId] = useState<string | null>(null);
   const [inputText, setInputText] = useState("");
-  const [messages, setMessages] = useState<Message[]>([]);
 
-  function refreshPage() {
-    window.location.reload();
-  }
+  useEffect(() => {
+    const fetchChats = async () => {
+      try {
+        const response = await fetch(`http://localhost:5000/api/chats/${userId}`);
+        const data = await response.json();
+        setChats(data);
+        if (data.length > 0) {
+          setActiveChatId(data[0].id); // Set the first chat as active by default
+        }
+      } catch (error) {
+        console.error("Error fetching chats:", error);
+      }
+    };
 
-  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setInputText(event.target.value);
+    fetchChats();
+  }, []);
+
+  const createNewChat = async () => {
+    try {
+      const response = await fetch(`http://localhost:5000/api/chats/${userId}`, {
+        method: "POST",
+      });
+      const newChat = await response.json();
+      setChats((prev) => [...prev, newChat]);
+      setActiveChatId(newChat.id);
+    } catch (error) {
+      console.error("Error creating new chat:", error);
+    }
   };
 
-  const handleSubmit = async () => {
-    if (!inputText.trim()) {
-      alert("Please write something.");
-      return;
-    }
+  const sendMessage = async () => {
+    if (!inputText.trim() || !activeChatId) return;
 
-    setMessages((prevMessages) => [
-      ...prevMessages,
-      { 
-        sender: "user", 
-        text: inputText 
-      },
-    ]);
+    const message: Message = { sender: "user", text: inputText };
+
+    // Update messages locally
+    setChats((prev) =>
+      prev.map((chat) =>
+        chat.id === activeChatId
+          ? { ...chat, messages: [...chat.messages, message] }
+          : chat
+      )
+    );
     setInputText("");
 
     try {
-      const response = await fetch("http://localhost:5000/api/generate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt: inputText }),
-      });
-
-      const data = await response.json();
-
-      setMessages((prevMessages) => [
-        ...prevMessages,
-        { 
-          sender: "openai", 
-          text: data.text || "No response received." 
-        },
-      ]);
-    } catch (error) {
-      console.error("Error calling backend API:", error);
-      setMessages((prevMessages) => [
-        ...prevMessages,
+      const response = await fetch(
+        `http://localhost:5000/api/chats/${userId}/${activeChatId}`,
         {
-          sender: "openai",
-          text: "An error occurred while generating the response.",
-        },
-      ]);
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message }),
+        }
+      );
+
+      const updatedChat = await response.json();
+      setChats((prev) =>
+        prev.map((chat) => (chat.id === activeChatId ? updatedChat : chat))
+      );
+    } catch (error) {
+      console.error("Error sending message:", error);
     }
   };
 
+  const activeChat = chats.find((chat) => chat.id === activeChatId);
+
   return (
-    <Box
-      sx={{
-        display: "flex",
-        flexDirection: "row",
-        height: "100vh",
-        backgroundColor: "#f9f9f9",
-        fontFamily: "Arial, sans-serif",
-      }}
-    >
-      {/* Sidebar */}
+    <Box display="flex" height="100vh">
+      {/* Sidebar for Chat List */}
       <Box
-        sx={{
-          width: "250px",
-          backgroundColor: "#fff",
-          boxShadow: "2px 0 5px rgba(0, 0, 0, 0.1)",
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "space-between",
-          padding: "20px",
-        }}
+        width="250px"
+        p={2}
+        bgcolor="#f4f4f4"
+        display="flex"
+        flexDirection="column"
+        borderRight="1px solid #ddd"
       >
-        <Box>
-          <Typography
-            variant="h5"
-            sx={{ fontWeight: "bold", marginBottom: "20px" }}
-          >
-            StylifyAI
+        <IconButton onClick={() => navigate("/profile")}>
+          <AccountCircleIcon />
+        </IconButton>
+        <NavLink to={"/learning-paths"} style={{ textDecoration: "none" }}>
+          <Typography variant="h5" mb={2}>
+            Learning paths
           </Typography>
-          <Button
-            onClick={refreshPage}
-            sx={{
-              background: "none",
-              padding: "0",
-              textTransform: "none",
-            }}
-          >
-            <Typography
-              variant="body1"
-              sx={{ color: "#555", cursor: "pointer", marginBottom: "10px" }}
+        </NavLink>
+        <Typography variant="h6" mb={2}>
+          Chats
+        </Typography>
+        <List>
+          {chats.map((chat) => (
+            <ListItem
+              button
+              key={chat.id}
+              selected={chat.id === activeChatId}
+              onClick={() => setActiveChatId(chat.id)}
             >
-              ✨ New Chat
-            </Typography>
-          </Button>
-          <NavLink to={"/learning-paths"} style={{ textDecoration: "none" }}>
-            <Typography
-              variant="body1"
-              sx={{ color: "#555", cursor: "pointer" }}
-            >
-              🗂️ Learning paths
-            </Typography>
-          </NavLink>
-        </Box>
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            padding: "10px",
-            border: "1px solid #ddd",
-            borderRadius: "10px",
-            cursor: "pointer",
-          }}
-        >
-          <Avatar sx={{ backgroundColor: "#3f51b5", marginRight: "10px" }}>
-            M
-          </Avatar>
-          <Typography variant="body2" sx={{ fontWeight: "bold" }}>
-            Mihnea Seitoaru
-          </Typography>
-        </Box>
+              <ListItemText primary={`Chat ${chat.id}`} />
+            </ListItem>
+          ))}
+        </List>
+        
+        <Button variant="contained" color="primary" onClick={createNewChat}>
+          New Chat
+        </Button>
+        
       </Box>
 
-      {/* Main Content */}
-      <Box
-        sx={{
-          flexGrow: 1,
-          display: "flex",
-          flexDirection: "column",
-          padding: "20px",
-        }}
-      >
-        {/* Top Navigation */}
-        <AppBar
-          position="static"
-          sx={{
-            backgroundColor: "transparent",
-            boxShadow: "none",
-            padding: "10px 20px",
-            display: "flex",
-            flexDirection: "row",
-            justifyContent: "flex-end",
-          }}
-        >
-          <Toolbar disableGutters sx={{ gap: 2 }}>
-            <IconButton>
-              <SearchIcon />
-            </IconButton>
-            <IconButton>
-              <NotificationsNoneIcon />
-            </IconButton>
-            <IconButton>
-              <WbSunnyIcon />
-            </IconButton>
-            <IconButton onClick={() => navigate("/profile")}>
-              <AccountCircleIcon />
-            </IconButton>
-          </Toolbar>
-        </AppBar>
+      {/* Main Chat Window */}
+      <Box flex="1" display="flex" flexDirection="column" p={2}>
+        <Typography variant="h5" mb={2}>
+          {activeChatId ? `Chat: ${activeChatId}` : "Select a chat to start"}
+        </Typography>
 
-        {/* Chat Messages */}
-        <Box
-          sx={{
-            flexGrow: 1,
-            overflowY: "auto",
-            marginBottom: "10px",
-            display: "flex",
-            flexDirection: "column",
-            gap: "10px",
-          }}
-        >
-          {messages.map((message, index) => (
-            <Box
+        {/* Messages */}
+        <Box flex="1" overflow="auto" mb={2}>
+          {activeChat?.messages.map((message, index) => (
+            <Paper
               key={index}
               sx={{
-                display: "flex",
-                justifyContent:
-                  message.sender === "user" ? "flex-end" : "flex-start",
+                p: 1,
+                mb: 1,
+                alignSelf: message.sender === "user" ? "flex-end" : "flex-start",
+                bgcolor: message.sender === "user" ? "#3f51b5" : "#e0e0e0",
+                color: message.sender === "user" ? "#fff" : "#000",
               }}
             >
-              <Paper
-                sx={{
-                  padding: "10px 15px",
-                  maxWidth: "60%",
-                  backgroundColor:
-                    message.sender === "user" ? "#3f51b5" : "#e0e0e0",
-                  color: message.sender === "user" ? "#fff" : "#000",
-                  borderRadius: "10px",
-                }}
-              >
-                {message.text}
-              </Paper>
-            </Box>
+              {message.text}
+            </Paper>
           ))}
         </Box>
 
         {/* Input Field */}
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            gap: "10px",
-            borderTop: "1px solid #ddd",
-            paddingTop: "10px",
-          }}
-        >
+        <Box display="flex" gap={1}>
           <TextField
             fullWidth
-            placeholder="Type your message..."
-            variant="outlined"
             value={inputText}
-            onChange={handleInputChange}
+            onChange={(e) => setInputText(e.target.value)}
+            placeholder="Type a message..."
           />
-          <Button
-            variant="contained"
-            onClick={handleSubmit}
-            sx={{
-              backgroundColor: "#3f51b5",
-              color: "#fff",
-              textTransform: "none",
-            }}
-          >
+          <Button variant="contained" color="primary" onClick={sendMessage}>
             Send
           </Button>
         </Box>
