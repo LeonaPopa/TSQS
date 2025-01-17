@@ -10,7 +10,7 @@ const generateResponse = async (text) => {
     - Informal
     - Narrative
     - Persuasive
-    and also provide some feedback on how to make it more academic-like. Also, suggest rephrasing the text to make it more formal.
+    and also provide some feedback on how to make it more academic-like. If it is not formal already, suggest rephrasing the text to make it more formal.
 
     This is the user input: ${text}`,
     max_tokens: 1000,
